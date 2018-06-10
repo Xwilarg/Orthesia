@@ -35,6 +35,7 @@ namespace Orthesia
             client.MessageReceived += HandleCommandAsync;
 
             await commands.AddModuleAsync<CommunicationModule>();
+            await commands.AddModuleAsync<TicketModule>();
 
             await client.LoginAsync(TokenType.Bot, File.ReadAllText("Keys/token.dat"));
             await client.StartAsync();
