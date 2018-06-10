@@ -3,6 +3,7 @@ using Discord.Commands;
 using Discord.WebSocket;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Threading.Tasks;
 
@@ -23,6 +24,7 @@ namespace Orthesia
             client = new DiscordSocketClient(new DiscordSocketConfig
             {
                 LogLevel = LogSeverity.Verbose,
+                MessageCacheSize = 50
             });
             client.Log += Log;
             commands.Log += Log;
@@ -33,6 +35,7 @@ namespace Orthesia
             p = this;
 
             client.MessageReceived += HandleCommandAsync;
+            client.ReactionAdded += ReactionAdded;
 
             await commands.AddModuleAsync<CommunicationModule>();
             await commands.AddModuleAsync<TicketModule>();
@@ -41,6 +44,24 @@ namespace Orthesia
             await client.StartAsync();
 
             await Task.Delay(-1);
+        }
+
+        private async Task ReactionAdded(Cacheable<IUserMessage, ulong> cach, ISocketMessageChannel chan, SocketReaction react)
+        {
+            if (File.Exists("Saves/support-" + react.UserId + ".dat") && File.ReadAllText("Saves/support-" + react.UserId + ".dat") == react.MessageId.ToString())
+            {
+                if (react.Emote.Name == "✅")
+                {
+                    File.Delete("Saves/support-" + react.UserId + ".dat");
+                    File.WriteAllText("Saves/timer-" + react.UserId + ".dat", DateTime.Now.ToString("yyMMddHHmmss"));
+                    await (chan as ITextChannel).DeleteAsync();
+                }
+                else if (react.Emote.Name == "❌")
+                {
+                    File.Delete("Saves/support-" + react.UserId + ".dat");
+                    await react.Message.Value.DeleteAsync();
+                }
+            }
         }
 
         private async Task HandleCommandAsync(SocketMessage arg)
