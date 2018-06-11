@@ -10,5 +10,11 @@ namespace Orthesia
         {
             await ReplyAsync(Sentences.hiStr);
         }
+
+        [Command("Help"), Summary("Give the help"), Alias("Commands")]
+        public async Task help()
+        {
+            await ReplyAsync(Sentences.help);
+        }
     }
 }

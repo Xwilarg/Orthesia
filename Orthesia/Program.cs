@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Net.Http;
 using System.Threading.Tasks;
 
 namespace Orthesia
@@ -18,6 +19,9 @@ namespace Orthesia
         private readonly IServiceCollection map = new ServiceCollection();
         private readonly CommandService commands = new CommandService();
         public static Program p;
+
+        private int commandReceived;
+        private string lastHourSent;
 
         private Program()
         {
@@ -34,6 +38,18 @@ namespace Orthesia
         {
             p = this;
 
+            lastHourSent = DateTime.Now.ToString("HH");
+            if (File.Exists("Saves/CommandReceived.dat"))
+            {
+                string[] content = File.ReadAllLines("Saves/CommandReceived.dat");
+                if (content[1] == lastHourSent)
+                    commandReceived = Convert.ToInt32(content[0]);
+                else
+                    commandReceived = 0;
+            }
+            else
+                commandReceived = 0;
+
             client.MessageReceived += HandleCommandAsync;
             client.ReactionAdded += ReactionAdded;
 
@@ -42,6 +58,14 @@ namespace Orthesia
 
             await client.LoginAsync(TokenType.Bot, File.ReadAllText("Keys/token.dat"));
             await client.StartAsync();
+
+            var task = Task.Run(async () => {
+                for (;;)
+                {
+                    await Task.Delay(60000);
+                    UpdateStatus();
+                }
+            });
 
             await Task.Delay(-1);
         }
@@ -73,8 +97,39 @@ namespace Orthesia
             if (msg.HasMentionPrefix(client.CurrentUser, ref pos) || msg.HasStringPrefix("o.", ref pos))
             {
                 var context = new SocketCommandContext(client, msg);
-                await commands.ExecuteAsync(context, pos);
+                IResult result = await commands.ExecuteAsync(context, pos);
+                if (result.IsSuccess && !context.User.IsBot)
+                {
+                    commandReceived++;
+                    File.WriteAllText("Saves/CommandReceived.dat", commandReceived + Environment.NewLine + lastHourSent);
+                }
             }
+        }
+
+        private async void UpdateStatus()
+        {
+            HttpClient httpClient = new HttpClient();
+            var values = new Dictionary<string, string> {
+                           { "token", File.ReadAllLines("Keys/websiteToken.dat")[1] },
+                           { "name", "Orthesia" }
+                        };
+            if (lastHourSent != DateTime.Now.ToString("HH"))
+            {
+                lastHourSent = DateTime.Now.ToString("HH");
+                commandReceived = 0;
+            }
+            values.Add("serverCount", client.Guilds.Count.ToString());
+            values.Add("nbMsgs", commandReceived.ToString());
+            FormUrlEncodedContent content = new FormUrlEncodedContent(values);
+
+            try
+            {
+                await httpClient.PostAsync(File.ReadAllLines("Keys/websiteToken.dat")[0], content);
+            }
+            catch (HttpRequestException)
+            { }
+            catch (TaskCanceledException)
+            { }
         }
 
         private Task Log(LogMessage msg)
