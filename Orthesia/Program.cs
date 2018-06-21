@@ -5,6 +5,7 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -22,6 +23,7 @@ namespace Orthesia
 
         private int commandReceived;
         private string lastHourSent;
+        public Random rand;
 
         private Program()
         {
@@ -50,6 +52,8 @@ namespace Orthesia
             else
                 commandReceived = 0;
 
+            rand = new Random();
+
             client.MessageReceived += HandleCommandAsync;
             client.ReactionAdded += ReactionAdded;
 
@@ -72,17 +76,21 @@ namespace Orthesia
 
         private async Task ReactionAdded(Cacheable<IUserMessage, ulong> cach, ISocketMessageChannel chan, SocketReaction react)
         {
-            if (File.Exists("Saves/support-" + react.UserId + ".dat") && File.ReadAllText("Saves/support-" + react.UserId + ".dat") == react.MessageId.ToString())
+            if (react.UserId == Sentences.myId)
+                return;
+            string userId = await TicketModule.GetChannelId(chan as ITextChannel);
+            if (userId != null && File.Exists("Saves/support-" + userId + ".dat") && File.ReadAllText("Saves/support-" + userId + ".dat") == react.MessageId.ToString())
             {
                 if (react.Emote.Name == "✅")
                 {
-                    File.Delete("Saves/support-" + react.UserId + ".dat");
-                    File.WriteAllText("Saves/timer-" + react.UserId + ".dat", DateTime.Now.ToString("yyMMddHHmmss"));
+                    File.Delete("Saves/support-" + userId + ".dat");
+                    File.Delete("Saves/chan-" + userId + ".dat");
+                    File.WriteAllText("Saves/timer-" + userId + ".dat", DateTime.Now.ToString("yyMMddHHmmss"));
                     await (chan as ITextChannel).DeleteAsync();
                 }
                 else if (react.Emote.Name == "❌")
                 {
-                    File.Delete("Saves/support-" + react.UserId + ".dat");
+                    File.Delete("Saves/support-" + userId + ".dat");
                     await react.Message.Value.DeleteAsync();
                 }
             }
@@ -94,7 +102,7 @@ namespace Orthesia
             if (msg == null) return;
 
             int pos = 0;
-            if (msg.HasMentionPrefix(client.CurrentUser, ref pos) || msg.HasStringPrefix("o.", ref pos))
+            if (msg.HasMentionPrefix(client.CurrentUser, ref pos) || msg.HasStringPrefix("!", ref pos))
             {
                 var context = new SocketCommandContext(client, msg);
                 IResult result = await commands.ExecuteAsync(context, pos);

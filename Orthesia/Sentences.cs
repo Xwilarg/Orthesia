@@ -4,6 +4,8 @@ namespace Orthesia
 {
     public static class Sentences
     {
+        public readonly static ulong myId = Program.p.client.CurrentUser.Id;
+
         public readonly static string hiStr = "Hi";
         public readonly static string deleteConfirm = "Êtes-vous sûr de vouloir fermer la requête ?";
         public readonly static string chanAlreadyExist = "You already have a opened support channel.";
