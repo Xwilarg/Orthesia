@@ -78,19 +78,19 @@ namespace Orthesia
         {
             if (react.UserId == Sentences.myId)
                 return;
-            string userId = await TicketModule.GetChannelId(chan as ITextChannel);
-            if (userId != null && File.Exists("Saves/support-" + userId + ".dat") && File.ReadAllText("Saves/support-" + userId + ".dat") == react.MessageId.ToString())
+            string id = (chan.Name.StartsWith("support-")) ? (chan.Name.Substring(8, 4)) : (null);
+            if (id != null && File.Exists("Saves/support-" + id + ".dat") && File.ReadAllText("Saves/support-" + id + ".dat") == react.MessageId.ToString())
             {
                 if (react.Emote.Name == "✅")
                 {
-                    File.Delete("Saves/support-" + userId + ".dat");
-                    File.Delete("Saves/chan-" + userId + ".dat");
-                    File.WriteAllText("Saves/timer-" + userId + ".dat", DateTime.Now.ToString("yyMMddHHmmss"));
+                    File.Delete("Saves/support-" + id + ".dat");
+                    File.Delete("Saves/chan-" + id + ".dat");
+                    File.WriteAllText("Saves/timer-" + react.UserId + ".dat", DateTime.Now.ToString("yyMMddHHmmss"));
                     await (chan as ITextChannel).DeleteAsync();
                 }
                 else if (react.Emote.Name == "❌")
                 {
-                    File.Delete("Saves/support-" + userId + ".dat");
+                    File.Delete("Saves/support-" + id + ".dat");
                     await react.Message.Value.DeleteAsync();
                 }
             }

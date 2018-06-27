@@ -16,7 +16,7 @@ namespace Orthesia
             if (File.Exists("Saves/timer-" + Context.User.Id + ".dat")
                 && DateTime.ParseExact(File.ReadAllText("Saves/timer-" + Context.User.Id + ".dat"), "yyMMddHHmmss", System.Globalization.CultureInfo.InvariantCulture).AddMinutes(10).CompareTo(DateTime.Now) == 1)
                 await ReplyAsync(Sentences.needWait);
-            else if (!(await Context.Guild.GetTextChannelsAsync()).ToArray().Any(x => x.Name == "support-" + Context.User.Id))
+            else if (!await IsUserInSupport(Context.Guild, Context.User))
             {
                 string id;
                 IReadOnlyCollection<ITextChannel> chans = await Context.Guild.GetTextChannelsAsync();
@@ -24,7 +24,7 @@ namespace Orthesia
                 {
                     id = GetRandomId();
                 } while (chans.Count(x => x.Name == "support-" + id) > 0);
-                File.WriteAllText("Saves/chan-" + Context.User.Id + ".dat", id);
+                File.WriteAllText("Saves/chan-" + id + ".dat", id);
                 if (File.Exists("Saves/timer-" + Context.User.Id + ".dat"))
                     File.Delete("Saves/timer-" + Context.User.Id + ".dat");
                 ITextChannel chan = await Context.Guild.CreateTextChannelAsync("support-" + id);
@@ -39,37 +39,31 @@ namespace Orthesia
                 await ReplyAsync(Sentences.chanAlreadyExist);
         }
 
+        private async Task<bool> IsUserInSupport(IGuild guild, IUser user)
+        {
+            foreach (ITextChannel chan in await guild.GetTextChannelsAsync())
+            {
+                if (chan.Name.StartsWith("support-") && await (chan.GetUsersAsync().Flatten()).Any(x => x.Id == user.Id))
+                    return (true);
+            }
+            return (false);
+        }
+
         [Command("Close")]
         public async Task CloseTicket()
         {
-            string userId = await GetChannelId(Context.Channel as ITextChannel);
-            if (userId != null && File.Exists("Saves/chan-" + userId + ".dat") && Context.Channel.Name == "support-" + File.ReadAllText("Saves/chan-" + userId + ".dat"))
+            string id = (Context.Channel.Name.StartsWith("support-")) ? (Context.Channel.Name.Substring(8, 4)) : (null);
+            if (id != null)
             {
+                if (File.Exists("Saves/support-" + id + ".dat"))
+                    await (await Context.Channel.GetMessageAsync(Convert.ToUInt64(File.ReadAllText("Saves/support-" + id + ".dat")))).DeleteAsync();
                 IUserMessage msg = await ReplyAsync(Sentences.deleteConfirm);
                 await msg.AddReactionAsync(new Emoji("✅"));
                 await msg.AddReactionAsync(new Emoji("❌"));
-                File.WriteAllText("Saves/support-" + userId + ".dat", msg.Id.ToString());
+                File.WriteAllText("Saves/support-" + id + ".dat", msg.Id.ToString());
             }
             else
                 await ReplyAsync(Sentences.wrongChan);
-        }
-
-        public static async Task<string> GetChannelId(ITextChannel chan)
-        {
-            string userId = null;
-            IEnumerable<IUser> users = await chan.GetUsersAsync().FlattenAsync();
-            foreach (string file in Directory.GetFiles("Saves"))
-            {
-                FileInfo fi = new FileInfo(file);
-                if (fi.Name.StartsWith("chan-"))
-                {
-                    string name = fi.Name.Substring(5, fi.Name.Length - 9);
-                    IUser user = users.ToList().Find(x => x.Id.ToString() == name);
-                    if (user != null)
-                        userId = user.Id.ToString();
-                }
-            }
-            return (userId);
         }
 
         private string GetRandomId()
