@@ -84,9 +84,12 @@ namespace Orthesia
                 if (react.Emote.Name == "✅")
                 {
                     File.Delete("Saves/support-" + id + ".dat");
+                    string[] content = File.ReadAllLines("Saves/chan-" + id + ".dat");
+                    await (await (await (chan as ITextChannel).Guild.GetTextChannelAsync(Convert.ToUInt64(content[0]))).GetMessageAsync(Convert.ToUInt64(content[1]))).DeleteAsync();
                     File.Delete("Saves/chan-" + id + ".dat");
                     File.WriteAllText("Saves/timer-" + react.UserId + ".dat", DateTime.Now.ToString("yyMMddHHmmss"));
                     await (chan as ITextChannel).DeleteAsync();
+                    await (await react.User.Value.GetOrCreateDMChannelAsync()).SendMessageAsync(Sentences.requestClosedPm);
                 }
                 else if (react.Emote.Name == "❌")
                 {

@@ -15,6 +15,7 @@ namespace Orthesia
         public readonly static string help = "**Ticket**: Open a ticket in a private channel" + Environment.NewLine +
                                             "**Close**: Close the currently opened ticket";
         public readonly static string openRequestPm = "Vous avez crée une requête sur le Discord Orthesia, un membre du staff répondra à votre demande au plus vite.";
+        public readonly static string requestClosedPm = "Vous avez fermé la requête avec succès.";
         public readonly static string openRequestChan = "```fix" + Environment.NewLine +
                                                         "Merci d'avoir crée une requête sur le Discord d'Orthesia." + Environment.NewLine +
                                                         "Un membre du support répondra à vos questions dans les meilleurs délais." + Environment.NewLine +
