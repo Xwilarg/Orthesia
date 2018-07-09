@@ -33,6 +33,7 @@ namespace Orthesia
                 File.WriteAllText("Saves/chan-" + id + ".dat", Context.Channel.Id + Environment.NewLine + (await ReplyAsync(Sentences.chanCreated("<#" + chan.Id + ">"))).Id);
                 await Context.User.SendMessageAsync(Sentences.openRequestPm);
                 await chan.SendMessageAsync(Sentences.openRequestChan);
+                await Context.Message.DeleteAsync();
             }
             else
                 await ReplyAsync(Sentences.chanAlreadyExist);
