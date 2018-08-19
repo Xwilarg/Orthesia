@@ -5,7 +5,6 @@ using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -20,9 +19,7 @@ namespace Orthesia
         private readonly IServiceCollection map = new ServiceCollection();
         private readonly CommandService commands = new CommandService();
         public static Program p;
-
-        private int commandReceived;
-        private string lastHourSent;
+        
         public Random rand;
 
         private Program()
@@ -39,19 +36,6 @@ namespace Orthesia
         private async Task MainAsync()
         {
             p = this;
-
-            lastHourSent = DateTime.Now.ToString("HH");
-            if (File.Exists("Saves/CommandReceived.dat"))
-            {
-                string[] content = File.ReadAllLines("Saves/CommandReceived.dat");
-                if (content[1] == lastHourSent)
-                    commandReceived = Convert.ToInt32(content[0]);
-                else
-                    commandReceived = 0;
-            }
-            else
-                commandReceived = 0;
-
             rand = new Random();
 
             client.MessageReceived += HandleCommandAsync;
@@ -110,37 +94,38 @@ namespace Orthesia
                 var context = new SocketCommandContext(client, msg);
                 IResult result = await commands.ExecuteAsync(context, pos);
                 if (result.IsSuccess && !context.User.IsBot)
-                {
-                    commandReceived++;
-                    File.WriteAllText("Saves/CommandReceived.dat", commandReceived + Environment.NewLine + lastHourSent);
-                }
+                    await UpdateElement(new Tuple<string, string>[] { new Tuple<string, string>("nbMsgs", "1") });
             }
         }
 
-        private async void UpdateStatus()
+        private async Task UpdateElement(Tuple<string, string>[] elems)
         {
             HttpClient httpClient = new HttpClient();
             var values = new Dictionary<string, string> {
                            { "token", File.ReadAllLines("Keys/websiteToken.dat")[1] },
+                           { "action", "add" },
                            { "name", "Orthesia" }
                         };
-            if (lastHourSent != DateTime.Now.ToString("HH"))
+            foreach (var elem in elems)
             {
-                lastHourSent = DateTime.Now.ToString("HH");
-                commandReceived = 0;
+                values.Add(elem.Item1, elem.Item2);
             }
-            values.Add("serverCount", client.Guilds.Count.ToString());
-            values.Add("nbMsgs", commandReceived.ToString());
-            FormUrlEncodedContent content = new FormUrlEncodedContent(values);
-
+            HttpRequestMessage msg = new HttpRequestMessage(HttpMethod.Post, File.ReadAllLines("Keys/websiteToken.dat")[0]);
+            msg.Content = new FormUrlEncodedContent(values);
+            
             try
             {
-                await httpClient.PostAsync(File.ReadAllLines("Keys/websiteToken.dat")[0], content);
+                await httpClient.SendAsync(msg);
             }
             catch (HttpRequestException)
             { }
             catch (TaskCanceledException)
             { }
+        }
+
+        private async void UpdateStatus()
+        {
+            await UpdateElement(new Tuple<string, string>[] { new Tuple<string, string>("serverCount", client.Guilds.Count.ToString()) });
         }
 
         private Task Log(LogMessage msg)
