@@ -40,6 +40,7 @@ namespace Orthesia
 
             client.MessageReceived += HandleCommandAsync;
             client.ReactionAdded += ReactionAdded;
+            client.UserJoined += UserJoin;
 
             await commands.AddModuleAsync<CommunicationModule>();
             await commands.AddModuleAsync<TicketModule>();
@@ -56,6 +57,11 @@ namespace Orthesia
             });
 
             await Task.Delay(-1);
+        }
+
+        private async Task UserJoin(SocketGuildUser user)
+        {
+            await user.AddRoleAsync(user.Guild.GetRole(464138124029853697));
         }
 
         private async Task ReactionAdded(Cacheable<IUserMessage, ulong> cach, ISocketMessageChannel chan, SocketReaction react)
