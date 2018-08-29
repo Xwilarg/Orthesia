@@ -16,7 +16,6 @@ namespace Orthesia
              => new Program().MainAsync().GetAwaiter().GetResult();
 
         public readonly DiscordSocketClient client;
-        private readonly IServiceCollection map = new ServiceCollection();
         private readonly CommandService commands = new CommandService();
         public static Program p;
         
@@ -42,8 +41,8 @@ namespace Orthesia
             client.ReactionAdded += ReactionAdded;
             client.UserJoined += UserJoin;
 
-            await commands.AddModuleAsync<CommunicationModule>();
-            await commands.AddModuleAsync<TicketModule>();
+            await commands.AddModuleAsync<CommunicationModule>(null);
+            await commands.AddModuleAsync<TicketModule>(null);
 
             await client.LoginAsync(TokenType.Bot, File.ReadAllText("Keys/token.dat"));
             await client.StartAsync();
@@ -98,7 +97,7 @@ namespace Orthesia
             if (msg.HasMentionPrefix(client.CurrentUser, ref pos) || msg.HasStringPrefix("!", ref pos))
             {
                 var context = new SocketCommandContext(client, msg);
-                IResult result = await commands.ExecuteAsync(context, pos);
+                IResult result = await commands.ExecuteAsync(context, pos, null);
                 if (result.IsSuccess && !context.User.IsBot)
                     await UpdateElement(new Tuple<string, string>[] { new Tuple<string, string>("nbMsgs", "1") });
             }

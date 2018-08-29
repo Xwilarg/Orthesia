@@ -26,10 +26,10 @@ namespace Orthesia
                 } while (chans.Count(x => x.Name == "support-" + id) > 0);
                 if (File.Exists("Saves/timer-" + Context.User.Id + ".dat"))
                     File.Delete("Saves/timer-" + Context.User.Id + ".dat");
-                ITextChannel chan = await Context.Guild.CreateTextChannelAsync("support-" + id);
-                await chan.AddPermissionOverwriteAsync(Context.User, new OverwritePermissions(readMessages: PermValue.Allow));
-                await chan.AddPermissionOverwriteAsync(Context.Guild.GetRole(455505689612255243), new OverwritePermissions(readMessages: PermValue.Allow));
-                await chan.AddPermissionOverwriteAsync(Context.Guild.EveryoneRole, new OverwritePermissions(readMessages: PermValue.Deny));
+                ITextChannel chan = await Context.Guild.CreateTextChannelAsync("support-" + id, x => x.CategoryId = 484466560204013577);
+                await chan.AddPermissionOverwriteAsync(Context.User, new OverwritePermissions(viewChannel: PermValue.Allow));
+                await chan.AddPermissionOverwriteAsync(Context.Guild.GetRole(455505689612255243), new OverwritePermissions(viewChannel: PermValue.Allow));
+                await chan.AddPermissionOverwriteAsync(Context.Guild.EveryoneRole, new OverwritePermissions(viewChannel: PermValue.Deny));
                 File.WriteAllText("Saves/chan-" + id + ".dat", Context.Channel.Id + Environment.NewLine + (await ReplyAsync(Sentences.chanCreated("<#" + chan.Id + ">"))).Id);
                 await Context.User.SendMessageAsync(Sentences.openRequestPm);
                 await chan.SendMessageAsync(Sentences.openRequestChan);
