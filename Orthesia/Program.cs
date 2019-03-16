@@ -1,7 +1,6 @@
 ﻿using Discord;
 using Discord.Commands;
 using Discord.WebSocket;
-using Microsoft.Extensions.DependencyInjection;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -39,7 +38,6 @@ namespace Orthesia
 
             client.MessageReceived += HandleCommandAsync;
             client.ReactionAdded += ReactionAdded;
-            client.UserJoined += UserJoin;
 
             await commands.AddModuleAsync<CommunicationModule>(null);
             await commands.AddModuleAsync<TicketModule>(null);
@@ -56,11 +54,6 @@ namespace Orthesia
             });
 
             await Task.Delay(-1);
-        }
-
-        private async Task UserJoin(SocketGuildUser user)
-        {
-            await user.AddRoleAsync(user.Guild.GetRole(464138124029853697));
         }
 
         private async Task ReactionAdded(Cacheable<IUserMessage, ulong> cach, ISocketMessageChannel chan, SocketReaction react)
