@@ -14,17 +14,18 @@ namespace Orthesia
         public readonly static string needWait = "Vous devez attendre 10 minutes entre chaque ticket.";
         public readonly static string help = "**Ticket**: Ouvre un ticket dans un canal privé." + Environment.NewLine +
                                             "**Close**: Ferme le ticket couramment ouvert.";
-        public readonly static string openRequestPm = "Vous avez crée une requête sur le Discord Orthesia, un membre du staff répondra à votre demande au plus vite.";
-        public readonly static string requestClosedPm = "Vous avez fermé la requête avec succès.";
         public readonly static string openRequestChan = "```fix" + Environment.NewLine +
-                                                        "Merci d'avoir crée une requête sur le Discord d'Orthesia." + Environment.NewLine +
-                                                        "Un membre du support répondra à vos questions dans les meilleurs délais." + Environment.NewLine +
-                                                        "En attendant, veuillez nous décrire la raison de cette requête en donnant un maximum d'informations possibles." + Environment.NewLine + Environment.NewLine +
-                                                        "• Si vous signalez un joueur pour une raison particulière, assurez-vous d'avoir les preuves nécessaires;" + Environment.NewLine +
-                                                        "• Si vous signalez un bug ou un quelconque problème, fournissez-nous un maximum d'informations dessus;" + Environment.NewLine +
-                                                        "• Pour toute autre demande, soyez clairs sur vos demandes." + Environment.NewLine + Environment.NewLine +
-                                                        "Nous nous réservons le droit de fermer un ticket si celui-ci ne respecte pas les règles ou qu'il est jugé inutile." + Environment.NewLine +
-                                                        "Consultez toujours les règles afin de vous assurer de ne pas signaler inutilement, https://lc.cx/mnzE" + Environment.NewLine +
+                                                        "Vous venez de créer un ticket, merci de choisir la nature de votre ticket." + Environment.NewLine +
+                                                        Environment.NewLine +
+                                                        "• Choisissez 1 si vous souhaitez signaler un joueur." + Environment.NewLine +
+                                                        "• Choisissez 2 si vous souhaitez signaler un bug en jeu." + Environment.NewLine +
+                                                        "• Choisissez 3 si vous avez un problème avec la boutique." + Environment.NewLine +
+                                                        "• Choisissez 4 si vous avez une question ou une autre demande particulière." + Environment.NewLine +
+                                                        Environment.NewLine +
+                                                        "Sachez que si votre ticket ne respecte pas les règles, nous nous réservons le droit de le supprimer." + Environment.NewLine +
+                                                        "Consultez toujours les règles afin de vous assurer de pas signaler inutilement." + Environment.NewLine +
+                                                        Environment.NewLine +
+                                                        "Le lien est disponible ici : https://orthesia4.webnode.fr/reglement/" + Environment.NewLine +
                                                         "```";
     }
 }

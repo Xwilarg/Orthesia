@@ -71,7 +71,6 @@ namespace Orthesia
                     File.Delete("Saves/chan-" + id + ".dat");
                     File.WriteAllText("Saves/timer-" + react.UserId + ".dat", DateTime.Now.ToString("yyMMddHHmmss"));
                     await (chan as ITextChannel).DeleteAsync();
-                    await (await react.User.Value.GetOrCreateDMChannelAsync()).SendMessageAsync(Sentences.requestClosedPm);
                 }
                 else if (react.Emote.Name == "❌")
                 {

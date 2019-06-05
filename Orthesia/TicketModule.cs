@@ -31,7 +31,6 @@ namespace Orthesia
                 await chan.AddPermissionOverwriteAsync(Context.Guild.GetRole(455505689612255243), new OverwritePermissions(viewChannel: PermValue.Allow));
                 await chan.AddPermissionOverwriteAsync(Context.Guild.EveryoneRole, new OverwritePermissions(viewChannel: PermValue.Deny));
                 File.WriteAllText("Saves/chan-" + id + ".dat", Context.Channel.Id + Environment.NewLine + (await ReplyAsync(Sentences.chanCreated("<#" + chan.Id + ">"))).Id);
-                await Context.User.SendMessageAsync(Sentences.openRequestPm);
                 await chan.SendMessageAsync(Sentences.openRequestChan);
                 await Context.Message.DeleteAsync();
             }
