@@ -1,0 +1,3 @@
+[submodule "Orthesia/Discord-Utils"]
+	path = Orthesia/Discord-Utils
+	url = https://github.com/Xwilarg/Discord-Utils
