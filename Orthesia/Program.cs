@@ -16,9 +16,12 @@ namespace Orthesia
 
         public readonly DiscordSocketClient client;
         private readonly CommandService commands = new CommandService();
-        public static Program p;
+        public static Program P;
+
+        private string websiteUrl, websiteToken;
         
         public Random rand;
+        public DateTime StartTime { private set; get; }
 
         private Program()
         {
@@ -33,8 +36,20 @@ namespace Orthesia
 
         private async Task MainAsync()
         {
-            p = this;
+            P = this;
             rand = new Random();
+
+            if (File.Exists("Keys/websiteToken.dat"))
+            {
+                string[] website = File.ReadAllLines("Keys/websiteToken.dat");
+                websiteUrl = website[0];
+                websiteToken = website[1];
+            }
+            else
+            {
+                websiteUrl = null;
+                websiteToken = null;
+            }
 
             client.MessageReceived += HandleCommandAsync;
             client.ReactionAdded += ReactionAdded;
@@ -43,6 +58,7 @@ namespace Orthesia
             await commands.AddModuleAsync<TicketModule>(null);
 
             await client.LoginAsync(TokenType.Bot, File.ReadAllText("Keys/token.dat"));
+            StartTime = DateTime.Now;
             await client.StartAsync();
 
             var task = Task.Run(async () => {
@@ -97,9 +113,11 @@ namespace Orthesia
 
         private async Task UpdateElement(Tuple<string, string>[] elems)
         {
+            if (websiteUrl == null)
+                return;
             HttpClient httpClient = new HttpClient();
             var values = new Dictionary<string, string> {
-                           { "token", File.ReadAllLines("Keys/websiteToken.dat")[1] },
+                           { "token", websiteToken },
                            { "action", "add" },
                            { "name", "Orthesia" }
                         };
@@ -107,7 +125,7 @@ namespace Orthesia
             {
                 values.Add(elem.Item1, elem.Item2);
             }
-            HttpRequestMessage msg = new HttpRequestMessage(HttpMethod.Post, File.ReadAllLines("Keys/websiteToken.dat")[0]);
+            HttpRequestMessage msg = new HttpRequestMessage(HttpMethod.Post, websiteUrl);
             msg.Content = new FormUrlEncodedContent(values);
             
             try

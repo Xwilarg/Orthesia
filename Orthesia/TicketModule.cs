@@ -69,7 +69,7 @@ namespace Orthesia
         {
             string finalStr = "";
             for (int i = 0; i < 4; i++)
-                finalStr += Program.p.rand.Next(10);
+                finalStr += Program.P.rand.Next(10);
             return (finalStr);
         }
     }
