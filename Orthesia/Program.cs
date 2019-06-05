@@ -23,6 +23,8 @@ namespace Orthesia
         public Random rand;
         public DateTime StartTime { private set; get; }
 
+        public Db db { private set; get; }
+
         private Program()
         {
             client = new DiscordSocketClient(new DiscordSocketConfig
@@ -36,6 +38,9 @@ namespace Orthesia
 
         private async Task MainAsync()
         {
+            db = new Db();
+            await db.InitAsync();
+
             P = this;
             rand = new Random();
 
