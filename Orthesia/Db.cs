@@ -48,12 +48,13 @@ namespace Orthesia
                     ).RunAsync(conn);
         }
 
-        public async Task AddTicket(ulong userId, ulong chanId, ulong introMsgId)
+        public async Task AddTicket(ulong userId, ulong chanId, ulong introMsgId, ulong menuMsgId)
         {
             string userIdStr = userId.ToString();
             await R.Db(dbName).Table("Supports").Insert(R.HashMap("id", userIdStr)
                 .With("Channel", chanId.ToString())
                 .With("IntroMsg", introMsgId.ToString())
+                .With("MenuMsg", menuMsgId.ToString())
                 ).RunAsync(conn);
         }
 
