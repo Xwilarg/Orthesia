@@ -29,7 +29,7 @@ namespace Orthesia
                 await chan.AddPermissionOverwriteAsync(Context.User, new OverwritePermissions(viewChannel: PermValue.Allow));
                 await chan.AddPermissionOverwriteAsync(Context.Guild.GetRole(455505689612255243), new OverwritePermissions(viewChannel: PermValue.Allow));
                 await chan.AddPermissionOverwriteAsync(Context.Guild.EveryoneRole, new OverwritePermissions(viewChannel: PermValue.Deny));
-                await Program.P.db.AddTicket(Context.User.Id, Context.Channel.Id, (await ReplyAsync(Sentences.chanCreated("<#" + chan.Id + ">"))).Id);
+                await Program.P.db.AddTicket(Context.User.Id, chan.Id, (await ReplyAsync(Sentences.chanCreated("<#" + chan.Id + ">"))).Id);
                 await chan.SendMessageAsync(Sentences.openRequestChan);
                 await Context.Message.DeleteAsync();
             }

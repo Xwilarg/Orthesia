@@ -29,10 +29,10 @@ namespace Orthesia
         public async Task<bool> IsLastMoreThan10Minutes(ulong userId)
         {
             string userIdStr = userId.ToString();
-            if (!await R.Db(dbName).Table("Users").GetAll(userIdStr).Count().Eq(0).RunAsync<bool>(conn))
-                return false;
+            if (await R.Db(dbName).Table("Users").GetAll(userIdStr).Count().Eq(0).RunAsync<bool>(conn))
+                return true;
             dynamic json = await R.Db(dbName).Table("Users").Get(userId.ToString()).RunAsync(conn);
-            return DateTime.ParseExact(json.Timer, "yyMMddHHmmss", CultureInfo.InvariantCulture).AddMinutes(10).CompareTo(DateTime.Now) < 0;
+            return DateTime.ParseExact((string)json.Timer, "yyMMddHHmmss", CultureInfo.InvariantCulture).AddMinutes(10).CompareTo(DateTime.Now) < 0;
         }
 
         public async Task UpdateTimer(ulong userId)
@@ -60,12 +60,12 @@ namespace Orthesia
         public async Task<bool> DoesTicketExist(ulong userId, IGuild guild)
         {
             string userIdStr = userId.ToString();
-            if (!await R.Db(dbName).Table("Supports").GetAll(userIdStr).Count().Eq(0).RunAsync<bool>(conn))
+            if (await R.Db(dbName).Table("Supports").GetAll(userIdStr).Count().Eq(0).RunAsync<bool>(conn))
                 return false;
             dynamic json = await R.Db(dbName).Table("Supports").Get(userId.ToString()).RunAsync(conn);
-            if (guild.GetTextChannelAsync(ulong.Parse((string)json.Channel)) == null)
+            if (await guild.GetTextChannelAsync(ulong.Parse((string)json.Channel)) == null)
             {
-                await R.Db(dbName).Table("Supports").DeleteAt(userId.ToString()).RunAsync(conn);
+                await R.Db(dbName).Table("Supports").Get(userIdStr).Delete().RunAsync(conn);
                 return false;
             }
             return true;
