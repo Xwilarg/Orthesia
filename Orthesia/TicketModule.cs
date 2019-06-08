@@ -13,8 +13,7 @@ namespace Orthesia
         [Command("Ticket")]
         public async Task OpenTicket()
         {
-            if (File.Exists("Saves/timer-" + Context.User.Id + ".dat")
-                && DateTime.ParseExact(File.ReadAllText("Saves/timer-" + Context.User.Id + ".dat"), "yyMMddHHmmss", System.Globalization.CultureInfo.InvariantCulture).AddMinutes(10).CompareTo(DateTime.Now) == 1)
+            if (!await Program.P.db.IsLastMoreThan10Minutes(Context.User.Id))
                 await ReplyAsync(Sentences.needWait);
             else if (!await IsUserInSupport(Context.Guild, Context.User))
             {
