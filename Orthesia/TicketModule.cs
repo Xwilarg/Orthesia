@@ -13,9 +13,11 @@ namespace Orthesia
         [Command("Ticket")]
         public async Task OpenTicket()
         {
-            if (!await Program.P.db.IsLastMoreThan10Minutes(Context.User.Id))
+            if (await Program.P.db.DoesTicketExist(Context.User.Id, Context.Guild))
+                await ReplyAsync(Sentences.chanAlreadyExist);
+            else if(!await Program.P.db.IsLastMoreThan10Minutes(Context.User.Id))
                 await ReplyAsync(Sentences.needWait);
-            else if (!await IsUserInSupport(Context.Guild, Context.User))
+            else
             {
                 string id;
                 IReadOnlyCollection<ITextChannel> chans = await Context.Guild.GetTextChannelsAsync();
@@ -23,28 +25,14 @@ namespace Orthesia
                 {
                     id = GetRandomId();
                 } while (chans.Count(x => x.Name == "support-" + id) > 0);
-                if (File.Exists("Saves/timer-" + Context.User.Id + ".dat"))
-                    File.Delete("Saves/timer-" + Context.User.Id + ".dat");
-                ITextChannel chan = await Context.Guild.CreateTextChannelAsync("support-" + id, x => x.CategoryId = 484466560204013577);
+                ITextChannel chan = await Context.Guild.CreateTextChannelAsync("support-" + id, x => x.CategoryId = 585811641648807936);
                 await chan.AddPermissionOverwriteAsync(Context.User, new OverwritePermissions(viewChannel: PermValue.Allow));
                 await chan.AddPermissionOverwriteAsync(Context.Guild.GetRole(455505689612255243), new OverwritePermissions(viewChannel: PermValue.Allow));
                 await chan.AddPermissionOverwriteAsync(Context.Guild.EveryoneRole, new OverwritePermissions(viewChannel: PermValue.Deny));
-                File.WriteAllText("Saves/chan-" + id + ".dat", Context.Channel.Id + Environment.NewLine + (await ReplyAsync(Sentences.chanCreated("<#" + chan.Id + ">"))).Id);
+                await Program.P.db.AddTicket(Context.User.Id, Context.Channel.Id, (await ReplyAsync(Sentences.chanCreated("<#" + chan.Id + ">"))).Id);
                 await chan.SendMessageAsync(Sentences.openRequestChan);
                 await Context.Message.DeleteAsync();
             }
-            else
-                await ReplyAsync(Sentences.chanAlreadyExist);
-        }
-
-        private async Task<bool> IsUserInSupport(IGuild guild, IUser user)
-        {
-            foreach (ITextChannel chan in await guild.GetTextChannelsAsync())
-            {
-                if (chan.Name.StartsWith("support-") && await (chan.GetUsersAsync().Flatten()).Any(x => x.Id == user.Id))
-                    return (true);
-            }
-            return (false);
         }
 
         [Command("Close")]

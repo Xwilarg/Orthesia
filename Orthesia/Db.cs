@@ -1,4 +1,5 @@
-﻿using RethinkDb.Driver;
+﻿using Discord;
+using RethinkDb.Driver;
 using RethinkDb.Driver.Net;
 using System;
 using System.Globalization;
@@ -45,6 +46,29 @@ namespace Orthesia
                 await R.Db(dbName).Table("Users").Update(R.HashMap("id", userIdStr)
                     .With("Timer", DateTime.Now.ToString("yyMMddHHmmss"))
                     ).RunAsync(conn);
+        }
+
+        public async Task AddTicket(ulong userId, ulong chanId, ulong introMsgId)
+        {
+            string userIdStr = userId.ToString();
+            await R.Db(dbName).Table("Supports").Insert(R.HashMap("id", userIdStr)
+                .With("Channel", chanId.ToString())
+                .With("IntroMsg", introMsgId.ToString())
+                ).RunAsync(conn);
+        }
+
+        public async Task<bool> DoesTicketExist(ulong userId, IGuild guild)
+        {
+            string userIdStr = userId.ToString();
+            if (!await R.Db(dbName).Table("Supports").GetAll(userIdStr).Count().Eq(0).RunAsync<bool>(conn))
+                return false;
+            dynamic json = await R.Db(dbName).Table("Supports").Get(userId.ToString()).RunAsync(conn);
+            if (guild.GetTextChannelAsync(ulong.Parse((string)json.Channel)) == null)
+            {
+                await R.Db(dbName).Table("Supports").DeleteAt(userId.ToString()).RunAsync(conn);
+                return false;
+            }
+            return true;
         }
 
         private RethinkDB R;
