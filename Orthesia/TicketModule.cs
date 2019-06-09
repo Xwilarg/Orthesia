@@ -2,7 +2,6 @@
 using Discord.Commands;
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 
@@ -31,7 +30,7 @@ namespace Orthesia
                 await chan.AddPermissionOverwriteAsync(Context.Guild.EveryoneRole, new OverwritePermissions(viewChannel: PermValue.Deny));
                 IUserMessage msg = await chan.SendMessageAsync(Sentences.openRequestChan);
                 await msg.AddReactionsAsync(new[] { new Emoji("1⃣"), new Emoji("2⃣"), new Emoji("3⃣"), new Emoji("4⃣") });
-                await Program.P.db.AddTicket(Context.User.Id, chan.Id, (await ReplyAsync(Sentences.chanCreated("<#" + chan.Id + ">"))).Id, msg.Id);
+                await Program.P.db.AddTicket(Context.User.Id, chan.Id, (await ReplyAsync(Sentences.chanCreated("<#" + chan.Id + ">"))).Id, msg.Id, id);
                 await Context.Message.DeleteAsync();
             }
         }
@@ -40,14 +39,13 @@ namespace Orthesia
         public async Task CloseTicket()
         {
             string id = (Context.Channel.Name.StartsWith("support-")) ? (Context.Channel.Name.Substring(8, 4)) : (null);
-            if (id != null)
+            if (await Program.P.db.DoesTicketExist(Context.User.Id, Context.Guild))
             {
-                if (File.Exists("Saves/support-" + id + ".dat"))
-                    await (await Context.Channel.GetMessageAsync(Convert.ToUInt64(File.ReadAllText("Saves/support-" + id + ".dat")))).DeleteAsync();
+                await Program.P.db.DeleteCloseMsg(Context.User.Id, Context.Channel);
                 IUserMessage msg = await ReplyAsync(Sentences.deleteConfirm);
                 await msg.AddReactionAsync(new Emoji("✅"));
                 await msg.AddReactionAsync(new Emoji("❌"));
-                File.WriteAllText("Saves/support-" + id + ".dat", msg.Id.ToString());
+                await Program.P.db.UpdateCloseMsg(Context.User.Id, msg.Id);
             }
             else
                 await ReplyAsync(Sentences.wrongChan);

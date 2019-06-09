@@ -48,13 +48,15 @@ namespace Orthesia
                     ).RunAsync(conn);
         }
 
-        public async Task AddTicket(ulong userId, ulong chanId, ulong introMsgId, ulong menuMsgId)
+        public async Task AddTicket(ulong userId, ulong chanId, ulong introMsgId, ulong menuMsgId, string randomId)
         {
             string userIdStr = userId.ToString();
             await R.Db(dbName).Table("Supports").Insert(R.HashMap("id", userIdStr)
                 .With("Channel", chanId.ToString())
                 .With("IntroMsg", introMsgId.ToString())
                 .With("MenuMsg", menuMsgId.ToString())
+                .With("RandomId", randomId)
+                .With("CloseMsg", 0)
                 ).RunAsync(conn);
         }
 
@@ -70,6 +72,30 @@ namespace Orthesia
                 return false;
             }
             return true;
+        }
+
+        public async Task DeleteCloseMsg(ulong userId, IMessageChannel chan)
+        {
+            string userIdStr = userId.ToString();
+            if (!await R.Db(dbName).Table("Supports").GetAll(userIdStr).Count().Eq(0).RunAsync<bool>(conn))
+                return;
+            dynamic json = await R.Db(dbName).Table("Supports").Get(userId.ToString()).RunAsync(conn);
+            if (json.CloseMsg == "0")
+                return;
+            await R.Db(dbName).Table("Supports").Update(R.HashMap("id", userIdStr)
+                .With("CloseMsg", "0")
+                ).RunAsync(conn);
+            IMessage msg = await chan.GetMessageAsync(ulong.Parse((string)json.closeMsg));
+            if (msg != null)
+                await msg.DeleteAsync();
+        }
+
+        public async Task UpdateCloseMsg(ulong userId, ulong msgId)
+        {
+            string userIdStr = userId.ToString();
+            await R.Db(dbName).Table("Supports").Update(R.HashMap("id", userIdStr)
+                .With("CloseMsg", msgId.ToString())
+                ).RunAsync(conn);
         }
 
         private RethinkDB R;
