@@ -81,21 +81,14 @@ namespace Orthesia
         {
             if (react.UserId == Sentences.myId)
                 return;
-            string id = (chan.Name.StartsWith("support-")) ? (chan.Name.Substring(8, 4)) : (null);
-            if (id != null && File.Exists("Saves/support-" + id + ".dat") && File.ReadAllText("Saves/support-" + id + ".dat") == react.MessageId.ToString())
+            if (await db.GetCloseMessage(react.UserId, chan) != null)
             {
                 if (react.Emote.Name == "✅")
                 {
-                    File.Delete("Saves/support-" + id + ".dat");
-                    string[] content = File.ReadAllLines("Saves/chan-" + id + ".dat");
-                    await (await (await (chan as ITextChannel).Guild.GetTextChannelAsync(Convert.ToUInt64(content[0]))).GetMessageAsync(Convert.ToUInt64(content[1]))).DeleteAsync();
-                    File.Delete("Saves/chan-" + id + ".dat");
-                    File.WriteAllText("Saves/timer-" + react.UserId + ".dat", DateTime.Now.ToString("yyMMddHHmmss"));
-                    await (chan as ITextChannel).DeleteAsync();
+                    await db.DeleteTicket(react.UserId, ((ITextChannel)chan).Guild);
                 }
                 else if (react.Emote.Name == "❌")
                 {
-                    File.Delete("Saves/support-" + id + ".dat");
                     await react.Message.Value.DeleteAsync();
                 }
             }

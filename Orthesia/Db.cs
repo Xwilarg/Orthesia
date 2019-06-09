@@ -48,7 +48,7 @@ namespace Orthesia
                     ).RunAsync(conn);
         }
 
-        public async Task AddTicket(ulong userId, ulong chanId, ulong introMsgId, ulong menuMsgId, string randomId)
+        public async Task AddTicket(ulong userId, ulong chanId, ulong introMsgId, ulong menuMsgId, string randomId, ulong chanFromId)
         {
             string userIdStr = userId.ToString();
             await R.Db(dbName).Table("Supports").Insert(R.HashMap("id", userIdStr)
@@ -57,7 +57,20 @@ namespace Orthesia
                 .With("MenuMsg", menuMsgId.ToString())
                 .With("RandomId", randomId)
                 .With("CloseMsg", 0)
+                .With("ChanFromId", chanFromId.ToString())
                 ).RunAsync(conn);
+        }
+
+        public async Task DeleteTicket(ulong userId, IGuild guild)
+        {
+            string userIdStr = userId.ToString();
+            if (await R.Db(dbName).Table("Supports").GetAll(userIdStr).Count().Eq(0).RunAsync<bool>(conn))
+                return;
+            dynamic json = await R.Db(dbName).Table("Supports").Get(userId.ToString()).RunAsync(conn);
+            await (await guild.GetTextChannelAsync(ulong.Parse((string)json.Channel))).DeleteAsync();
+            await (await (await guild.GetTextChannelAsync(ulong.Parse((string)json.Channel))).GetMessageAsync(ulong.Parse((string)json.IntroMsg))).DeleteAsync();
+            await R.Db(dbName).Table("Supports").Get(userIdStr).Delete().RunAsync(conn);
+            await UpdateTimer(userId);
         }
 
         public async Task<bool> DoesTicketExist(ulong userId, IGuild guild)
@@ -74,18 +87,23 @@ namespace Orthesia
             return true;
         }
 
-        public async Task DeleteCloseMsg(ulong userId, IMessageChannel chan)
+        public async Task<IMessage> GetCloseMessage(ulong userId, IMessageChannel chan)
         {
             string userIdStr = userId.ToString();
-            if (!await R.Db(dbName).Table("Supports").GetAll(userIdStr).Count().Eq(0).RunAsync<bool>(conn))
-                return;
+            if (await R.Db(dbName).Table("Supports").GetAll(userIdStr).Count().Eq(0).RunAsync<bool>(conn))
+                return null;
             dynamic json = await R.Db(dbName).Table("Supports").Get(userId.ToString()).RunAsync(conn);
             if (json.CloseMsg == "0")
-                return;
+                return null;
             await R.Db(dbName).Table("Supports").Update(R.HashMap("id", userIdStr)
                 .With("CloseMsg", "0")
                 ).RunAsync(conn);
-            IMessage msg = await chan.GetMessageAsync(ulong.Parse((string)json.closeMsg));
+            return await chan.GetMessageAsync(ulong.Parse((string)json.CloseMsg));
+        }
+
+        public async Task DeleteCloseMsg(ulong userId, IMessageChannel chan)
+        {
+            IMessage msg = await GetCloseMessage(userId, chan);
             if (msg != null)
                 await msg.DeleteAsync();
         }
