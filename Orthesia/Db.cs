@@ -38,7 +38,7 @@ namespace Orthesia
         public async Task UpdateTimer(ulong userId)
         {
             string userIdStr = userId.ToString();
-            if (!await R.Db(dbName).Table("Users").GetAll(userIdStr).Count().Eq(0).RunAsync<bool>(conn))
+            if (await R.Db(dbName).Table("Users").GetAll(userIdStr).Count().Eq(0).RunAsync<bool>(conn))
                 await R.Db(dbName).Table("Users").Insert(R.HashMap("id", userIdStr)
                     .With("Timer", DateTime.Now.ToString("yyMMddHHmmss"))
                     ).RunAsync(conn);
