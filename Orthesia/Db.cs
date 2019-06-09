@@ -68,7 +68,7 @@ namespace Orthesia
                 return;
             dynamic json = await R.Db(dbName).Table("Supports").Get(userId.ToString()).RunAsync(conn);
             await (await guild.GetTextChannelAsync(ulong.Parse((string)json.Channel))).DeleteAsync();
-            await (await (await guild.GetTextChannelAsync(ulong.Parse((string)json.Channel))).GetMessageAsync(ulong.Parse((string)json.IntroMsg))).DeleteAsync();
+            await (await (await guild.GetTextChannelAsync(ulong.Parse((string)json.ChanFromId))).GetMessageAsync(ulong.Parse((string)json.IntroMsg))).DeleteAsync();
             await R.Db(dbName).Table("Supports").Get(userIdStr).Delete().RunAsync(conn);
             await UpdateTimer(userId);
         }
