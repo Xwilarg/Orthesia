@@ -81,7 +81,7 @@ namespace Orthesia
         {
             if (react.UserId == Sentences.myId)
                 return;
-            if (await db.GetCloseMessage(react.UserId, chan) != null)
+            if (await db.GetCloseMessageId(react.UserId, chan) == react.MessageId.ToString())
             {
                 if (react.Emote.Name == "✅")
                 {
@@ -91,6 +91,28 @@ namespace Orthesia
                 {
                     await react.Message.Value.DeleteAsync();
                 }
+            }
+            else if (await db.GetMenuMessageId(react.UserId, chan) == react.MessageId.ToString())
+            {
+                if (react.Emote.Name == "1⃣")
+                {
+                    await chan.SendMessageAsync(Sentences.category1);
+                }
+                else if (react.Emote.Name == "2⃣")
+                {
+                    await chan.SendMessageAsync(Sentences.category2);
+                }
+                else if (react.Emote.Name == "3⃣")
+                {
+                    await chan.SendMessageAsync(Sentences.category3);
+                }
+                else if (react.Emote.Name == "4⃣")
+                {
+                    await chan.SendMessageAsync(Sentences.category4);
+                }
+                else
+                    return;
+                await (await cach.GetOrDownloadAsync()).DeleteAsync();
             }
         }
 

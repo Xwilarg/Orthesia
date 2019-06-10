@@ -89,23 +89,40 @@ namespace Orthesia
 
         public async Task<IMessage> GetCloseMessage(ulong userId, IMessageChannel chan)
         {
+            string closeMsg = await GetCloseMessageId(userId, chan);
+            if (closeMsg == "0")
+                return null;
+            return await chan.GetMessageAsync(ulong.Parse(closeMsg));
+        }
+
+        public async Task<string> GetCloseMessageId(ulong userId, IMessageChannel chan)
+        {
             string userIdStr = userId.ToString();
             if (await R.Db(dbName).Table("Supports").GetAll(userIdStr).Count().Eq(0).RunAsync<bool>(conn))
-                return null;
+                return "0";
             dynamic json = await R.Db(dbName).Table("Supports").Get(userId.ToString()).RunAsync(conn);
-            if (json.CloseMsg == "0")
-                return null;
-            await R.Db(dbName).Table("Supports").Update(R.HashMap("id", userIdStr)
-                .With("CloseMsg", "0")
-                ).RunAsync(conn);
-            return await chan.GetMessageAsync(ulong.Parse((string)json.CloseMsg));
+            return json.CloseMsg;
+        }
+
+        public async Task<string> GetMenuMessageId(ulong userId, IMessageChannel chan)
+        {
+            string userIdStr = userId.ToString();
+            if (await R.Db(dbName).Table("Supports").GetAll(userIdStr).Count().Eq(0).RunAsync<bool>(conn))
+                return "0";
+            dynamic json = await R.Db(dbName).Table("Supports").Get(userId.ToString()).RunAsync(conn);
+            return json.MenuMsg;
         }
 
         public async Task DeleteCloseMsg(ulong userId, IMessageChannel chan)
         {
             IMessage msg = await GetCloseMessage(userId, chan);
             if (msg != null)
+            {
+                await R.Db(dbName).Table("Supports").Update(R.HashMap("id", userId.ToString())
+                    .With("CloseMsg", "0")
+                    ).RunAsync(conn);
                 await msg.DeleteAsync();
+            }
         }
 
         public async Task UpdateCloseMsg(ulong userId, ulong msgId)
