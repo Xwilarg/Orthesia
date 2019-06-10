@@ -32,7 +32,7 @@ namespace Orthesia
             if (await R.Db(dbName).Table("Users").GetAll(userIdStr).Count().Eq(0).RunAsync<bool>(conn))
                 return true;
             dynamic json = await R.Db(dbName).Table("Users").Get(userId.ToString()).RunAsync(conn);
-            return DateTime.ParseExact((string)json.Timer, "yyMMddHHmmss", CultureInfo.InvariantCulture).AddMinutes(10).CompareTo(DateTime.Now) < 0;
+            return DateTime.ParseExact((string)json.Timer, "yyMMddHHmmss", CultureInfo.InvariantCulture).AddMinutes(5).CompareTo(DateTime.Now) < 0;
         }
 
         public async Task UpdateTimer(ulong userId)

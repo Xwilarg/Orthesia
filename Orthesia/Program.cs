@@ -71,6 +71,11 @@ namespace Orthesia
                 {
                     await Task.Delay(60000);
                     UpdateStatus();
+                    foreach (var chan in client.GetGuild(413302581968896000).GetCategoryChannel(585811641648807936).Channels)
+                    {
+                        if (chan.CreatedAt.AddMinutes(5).CompareTo(DateTime.Now) < 0)
+                            await chan.DeleteAsync();
+                    }
                 }
             });
 

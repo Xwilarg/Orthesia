@@ -11,7 +11,7 @@ namespace Orthesia
         public readonly static string chanAlreadyExist = "Vous avez déjà ouvert un canal de support.";
         public static string chanCreated(string chanName) { return ("Le canal " + chanName + " a été crée pour vous."); }
         public readonly static string wrongChan = "Vous devez être dans un canal de support pour le fermer.";
-        public readonly static string needWait = "Vous devez attendre 10 minutes entre chaque ticket.";
+        public readonly static string needWait = "Vous devez attendre 5 minutes entre chaque ticket.";
         public readonly static string help = "**Ticket**: Ouvre un ticket dans un canal privé." + Environment.NewLine +
                                             "**Close**: Ferme le ticket couramment ouvert.";
         public readonly static string openRequestChan =
