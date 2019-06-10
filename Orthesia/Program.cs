@@ -99,11 +99,13 @@ namespace Orthesia
                 {
                     await chan.SendMessageAsync(Sentences.category1);
                     await textChan.ModifyAsync(x => x.CategoryId = 585809200282861581);
+                    await textChan.AddPermissionOverwriteAsync(textChan.Guild.GetRole(455505689612255243), new OverwritePermissions(viewChannel: PermValue.Allow, sendMessages: PermValue.Allow));
                 }
                 else if (react.Emote.Name == "2⃣")
                 {
                     await chan.SendMessageAsync(Sentences.category2);
                     await textChan.ModifyAsync(x => x.CategoryId = 484466560204013577);
+                    await textChan.AddPermissionOverwriteAsync(textChan.Guild.GetRole(455505689612255243), new OverwritePermissions(viewChannel: PermValue.Allow, sendMessages: PermValue.Allow));
                 }
                 else if (react.Emote.Name == "3⃣")
                 {
@@ -114,6 +116,7 @@ namespace Orthesia
                 {
                     await chan.SendMessageAsync(Sentences.category4);
                     await textChan.ModifyAsync(x => x.CategoryId = 585809491493257247);
+                    await textChan.AddPermissionOverwriteAsync(textChan.Guild.GetRole(455505689612255243), new OverwritePermissions(viewChannel: PermValue.Allow, sendMessages: PermValue.Allow));
                 }
                 else
                     return;
