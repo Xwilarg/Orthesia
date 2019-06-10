@@ -94,25 +94,31 @@ namespace Orthesia
             }
             else if (await db.GetMenuMessageId(react.UserId, chan) == react.MessageId.ToString())
             {
+                ITextChannel textChan = (ITextChannel)chan;
                 if (react.Emote.Name == "1⃣")
                 {
                     await chan.SendMessageAsync(Sentences.category1);
+                    await textChan.ModifyAsync(x => x.CategoryId = 585809200282861581);
                 }
                 else if (react.Emote.Name == "2⃣")
                 {
                     await chan.SendMessageAsync(Sentences.category2);
+                    await textChan.ModifyAsync(x => x.CategoryId = 484466560204013577);
                 }
                 else if (react.Emote.Name == "3⃣")
                 {
                     await chan.SendMessageAsync(Sentences.category3);
+                    await textChan.ModifyAsync(x => x.CategoryId = 585809388221104148);
                 }
                 else if (react.Emote.Name == "4⃣")
                 {
                     await chan.SendMessageAsync(Sentences.category4);
+                    await textChan.ModifyAsync(x => x.CategoryId = 585809491493257247);
                 }
                 else
                     return;
                 await (await cach.GetOrDownloadAsync()).DeleteAsync();
+                await textChan.AddPermissionOverwriteAsync(await textChan.Guild.GetUserAsync(react.UserId), new OverwritePermissions(viewChannel: PermValue.Allow, sendMessages: PermValue.Allow));
             }
         }
 

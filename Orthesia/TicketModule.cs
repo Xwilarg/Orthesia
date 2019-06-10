@@ -25,8 +25,6 @@ namespace Orthesia
                 } while (chans.Count(x => x.Name == "support-" + id) > 0);
                 ITextChannel chan = await Context.Guild.CreateTextChannelAsync("support-" + id, x => x.CategoryId = 585811641648807936);
                 await chan.AddPermissionOverwriteAsync(Context.User, new OverwritePermissions(viewChannel: PermValue.Allow));
-                await chan.AddPermissionOverwriteAsync(Context.Guild.GetRole(455505689612255243), new OverwritePermissions(viewChannel: PermValue.Allow));
-                await chan.AddPermissionOverwriteAsync(Context.Guild.EveryoneRole, new OverwritePermissions(viewChannel: PermValue.Deny));
                 IUserMessage msg = await chan.SendMessageAsync(Sentences.openRequestChan);
                 await msg.AddReactionsAsync(new[] { new Emoji("1⃣"), new Emoji("2⃣"), new Emoji("3⃣"), new Emoji("4⃣") });
                 await Program.P.db.AddTicket(Context.User.Id, chan.Id, (await ReplyAsync(Sentences.chanCreated("<#" + chan.Id + ">"))).Id, msg.Id, id, Context.Channel.Id);
