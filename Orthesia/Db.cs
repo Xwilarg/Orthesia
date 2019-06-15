@@ -35,9 +35,23 @@ namespace Orthesia
             return DateTime.ParseExact((string)json.Timer, "yyMMddHHmmss", CultureInfo.InvariantCulture).AddMinutes(5).CompareTo(DateTime.Now) < 0;
         }
 
-        public async Task UpdateTimer(ulong userId)
+        public async Task DeleteChannel(ulong chanId)
         {
-            string userIdStr = userId.ToString();
+            foreach (var json in await R.Db(dbName).Table("Supports").RunAsync(conn))
+            {
+                if (json.Channel == chanId.ToString())
+                {
+                    await UpdateTimer((string)json.id);
+                    return;
+                }
+            }
+        }
+
+        public async Task UpdateTimer(ulong userId)
+            => await UpdateTimer(userId.ToString());
+
+        public async Task UpdateTimer(string userIdStr)
+        {
             if (await R.Db(dbName).Table("Users").GetAll(userIdStr).Count().Eq(0).RunAsync<bool>(conn))
                 await R.Db(dbName).Table("Users").Insert(R.HashMap("id", userIdStr)
                     .With("Timer", DateTime.Now.ToString("yyMMddHHmmss"))
