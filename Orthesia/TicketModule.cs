@@ -35,8 +35,7 @@ namespace Orthesia
         [Command("Close")]
         public async Task CloseTicket()
         {
-            string id = (Context.Channel.Name.StartsWith("support-")) ? (Context.Channel.Name.Substring(8, 4)) : (null);
-            if (await Program.P.db.DoesTicketExist(Context.User.Id, Context.Guild))
+            if (Context.Channel.Name.StartsWith("support-"))
             {
                 await Program.P.db.DeleteCloseMsg(Context.User.Id, Context.Channel);
                 IUserMessage msg = await ReplyAsync(Sentences.deleteConfirm);
