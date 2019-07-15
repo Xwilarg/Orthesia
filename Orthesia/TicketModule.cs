@@ -41,7 +41,7 @@ namespace Orthesia
                 IUserMessage msg = await ReplyAsync(Sentences.deleteConfirm);
                 await msg.AddReactionAsync(new Emoji("✅"));
                 await msg.AddReactionAsync(new Emoji("❌"));
-                await Program.P.db.UpdateCloseMsg(Context.User.Id, msg.Id);
+                await Program.P.db.UpdateCloseMsg(Context.Channel.Id, msg.Id);
             }
             else
                 await ReplyAsync(Sentences.wrongChan);

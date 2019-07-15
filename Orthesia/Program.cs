@@ -90,7 +90,7 @@ namespace Orthesia
             {
                 if (react.Emote.Name == "✅")
                 {
-                    await db.DeleteTicket(react.UserId, ((ITextChannel)chan).Guild);
+                    await db.DeleteTicket(react.Channel.Id, ((ITextChannel)chan).Guild);
                 }
                 else if (react.Emote.Name == "❌")
                 {

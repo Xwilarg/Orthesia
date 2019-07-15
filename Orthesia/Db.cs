@@ -75,16 +75,27 @@ namespace Orthesia
                 ).RunAsync(conn);
         }
 
-        public async Task DeleteTicket(ulong userId, IGuild guild)
+        public async Task DeleteTicket(ulong chanId, IGuild guild)
         {
-            string userIdStr = userId.ToString();
+            string chanIdStr = chanId.ToString();
+            dynamic json = null;
+            foreach (var jsonIntro in await R.Db(dbName).Table("Supports").RunAsync(conn))
+            {
+                if (jsonIntro.Channel == chanIdStr)
+                {
+                    json = jsonIntro;
+                    break;
+                }
+            }
+            if (json == null)
+                return;
+            string userIdStr = json.id;
             if (await R.Db(dbName).Table("Supports").GetAll(userIdStr).Count().Eq(0).RunAsync<bool>(conn))
                 return;
-            dynamic json = await R.Db(dbName).Table("Supports").Get(userId.ToString()).RunAsync(conn);
             await (await guild.GetTextChannelAsync(ulong.Parse((string)json.Channel))).DeleteAsync();
             await (await (await guild.GetTextChannelAsync(ulong.Parse((string)json.ChanFromId))).GetMessageAsync(ulong.Parse((string)json.IntroMsg))).DeleteAsync();
             await R.Db(dbName).Table("Supports").Get(userIdStr).Delete().RunAsync(conn);
-            await UpdateTimer(userId);
+            await UpdateTimer(ulong.Parse(userIdStr));
         }
 
         public async Task<bool> DoesTicketExist(ulong userId, IGuild guild)
@@ -139,12 +150,19 @@ namespace Orthesia
             }
         }
 
-        public async Task UpdateCloseMsg(ulong userId, ulong msgId)
+        public async Task UpdateCloseMsg(ulong chanId, ulong msgId)
         {
-            string userIdStr = userId.ToString();
-            await R.Db(dbName).Table("Supports").Update(R.HashMap("id", userIdStr)
-                .With("CloseMsg", msgId.ToString())
-                ).RunAsync(conn);
+            string chanIdStr = chanId.ToString();
+            foreach (var json in await R.Db(dbName).Table("Supports").RunAsync(conn))
+            {
+                if (json.Channel == chanIdStr)
+                {
+                    await R.Db(dbName).Table("Supports").Update(R.HashMap("id", (string)json.id)
+                        .With("CloseMsg", msgId.ToString())
+                        ).RunAsync(conn);
+                    break;
+                }
+            }
         }
 
         private RethinkDB R;
